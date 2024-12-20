@@ -126,7 +126,7 @@ export function OverviewAnalyticsView() {
         <Grid xs={12} md={6} lg={8}>
           <AnalyticsWebsiteVisits
             title="Ordens x Contagens (Atual)"
-            subheader="Veja a contagem de cada ordem atiiva no momento"
+            subheader="Veja a contagem de cada ordem ativas no momento"
             chart={{
               categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
               series: [

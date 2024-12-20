@@ -16,6 +16,7 @@ import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
 import { OrderClose } from '../close';
+import { OrderRemove } from '../remove';
 import { OrderRedirect } from '../redirect';
 
 import type { OrderProps } from '../types/order.type';
@@ -155,6 +156,7 @@ export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps
         >
           <OrderRedirect />
           <OrderClose orderId={row.id}/>
+          <OrderRemove orderId={row.id} />
         </MenuList>
       </Popover>
     </>

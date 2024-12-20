@@ -16,3 +16,5 @@ export const findOrderById = async (id: string) => api.get<OrderProps>(`/orders/
 export const createOrder = async (order: CreateOrderProps) => api.post('orders', order);
 
 export const closeOrder = async (id: string) => api.patch(`/orders/${id}/closed`);
+
+export const removeOrder = async (id: string) => api.delete(`/orders/${id}`);
