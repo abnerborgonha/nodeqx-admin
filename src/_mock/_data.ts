@@ -21,6 +21,21 @@ export const _myAccount = {
 
 // ----------------------------------------------------------------------
 
+export const _orders = [...Array(24)].map((_, index) => ({
+  id: `7e27409b-e676-41dd-8f33-1a54189f54${index}`,
+  productOrderId: `00${index + 1}`,
+  name: `Ordem 00${index + 1}`,
+  description: `Descrição da ordem ${index + 1}, incluindo informações detalhadas.`,
+  status: index % 2 === 0 ? 'ACTIVE' : 'CLOSED' as 'ACTIVE' | 'CLOSED', // Alterna entre ACTIVE e INACTIVE
+  deviceHistory: index % 3 === 0 ? null : `Histórico do dispositivo ${index + 1}`,
+  createdAt: new Date().toISOString(), // Data e hora atual
+  updatedAt: new Date().toISOString(), // Data e hora atual
+  batches: index % 2 === 0 ? [] : [`Lote ${index + 1}`], // Alterna entre vazio e com lote
+}));
+
+
+// ----------------------------------------------------------------------
+
 export const _users = [...Array(24)].map((_, index) => ({
   id: _id(index),
   name: _fullName(index),
