@@ -45,7 +45,8 @@
     "react-dom": "^18.3.1",
     "react-helmet-async": "^2.0.5",
     "react-router-dom": "^6.26.1",
-    "simplebar-react": "^3.2.6"
+    "simplebar-react": "^3.2.6",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^5.62.1",

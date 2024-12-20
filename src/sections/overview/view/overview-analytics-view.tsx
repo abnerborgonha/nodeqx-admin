@@ -1,5 +1,7 @@
-import { useMemo } from 'react';
+/* eslint-disable import/no-extraneous-dependencies */
 import { useQuery } from '@tanstack/react-query';
+import { io, type Socket } from 'socket.io-client';
+import { useMemo, useState, useEffect } from 'react';
 
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
@@ -17,6 +19,9 @@ import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [data, setData] = useState<string | null>(null);
+
   const { data: dataOrders } = useQuery({ queryKey: ['orders'], queryFn: findAllOrders, refetchInterval: 2000 })
   const { data: dataDevices } = useQuery({ queryKey: ['devices'], queryFn: findAllDevices, refetchInterval: 2000 })
 
@@ -38,6 +43,25 @@ export function OverviewAnalyticsView() {
     return [active, total, count]
   }, [dataOrders])
 
+
+  useEffect(() => {
+    const socketInstance = io('http://localhost:3001', {
+      transports: ['websocket'], // Garante o uso de WebSocket
+    });
+
+    setSocket(socketInstance);
+
+    // Listener para o evento "process-data"
+    socketInstance.on('process-data', (receivedData: string) => {
+      console.log('Dados recebidos:', receivedData);
+      setData(receivedData); // Atualiza o estado com os dados recebidos
+    });
+
+    // Limpeza ao desmontar o componente
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, []);
 
   return (
     <DashboardContent maxWidth="xl">
@@ -101,8 +125,8 @@ export function OverviewAnalyticsView() {
 
         <Grid xs={12} md={6} lg={8}>
           <AnalyticsWebsiteVisits
-            title="Website visits"
-            subheader="(+43%) than last year"
+            title="Ordens x Contagens (Atual)"
+            subheader="Veja a contagem de cada ordem atiiva no momento"
             chart={{
               categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
               series: [
