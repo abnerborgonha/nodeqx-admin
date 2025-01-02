@@ -15,5 +15,13 @@ export type OrderProps = {
   historics?: OrderHistoric[],
   createdAt: string
   updatedAt: string
-  batches?: any[]
+  device: {
+    id: string
+    deviceId: string
+    availability: string
+    status: string
+    networkStatus: string
+    createdAt: Date
+    updatedAt: Date
+  }
 };

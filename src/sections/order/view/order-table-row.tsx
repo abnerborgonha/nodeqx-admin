@@ -15,6 +15,8 @@ import { Table, Collapse, TableBody, TableHead, Typography } from '@mui/material
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
+import { DeviceItem } from 'src/sections/device/device-item';
+
 import { OrderClose } from '../close';
 import { OrderRemove } from '../remove';
 import { OrderRedirect } from '../redirect';
@@ -48,10 +50,10 @@ export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps
 
   const statusHistoricOrder = {
     'ON': <Label color="success">ON</Label>,
-    'PAUSE':  <Label color="warning">PAUSE</Label>,
+    'PAUSE': <Label color="warning">PAUSE</Label>,
     'EMERGENCY': <Label color="error">EMERGENCY</Label>,
-    'STOP':  <Label color="info">STOP</Label>,
-    'OFF':  <Label color="default">OFF</Label>
+    'STOP': <Label color="info">STOP</Label>,
+    'OFF': <Label color="default">OFF</Label>
   }
 
   return (
@@ -88,6 +90,10 @@ export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps
         <TableCell>{format(row.createdAt, 'dd/MM/yyyy HH:mm')}</TableCell>
 
         <TableCell>{format(row.updatedAt, 'dd/MM/yyyy HH:mm')}</TableCell>
+
+        <TableCell>
+          <DeviceItem device={row.device} />
+        </TableCell>
 
         <TableCell align="right">
           <IconButton onClick={handleOpenPopover}>
@@ -155,7 +161,7 @@ export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps
           }}
         >
           <OrderRedirect />
-          <OrderClose orderId={row.id}/>
+          <OrderClose orderId={row.id} />
           <OrderRemove orderId={row.id} />
         </MenuList>
       </Popover>

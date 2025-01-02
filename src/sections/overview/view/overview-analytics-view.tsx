@@ -1,7 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { io, type Socket } from 'socket.io-client';
-import { useMemo, useState, useEffect } from 'react';
 
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
@@ -12,56 +11,56 @@ import { findAllDevices } from 'src/service/network/lib/device.network';
 
 import { Iconify } from 'src/components/iconify';
 
-import { AnalyticsCurrentVisits } from '../analytics-current-visits';
-import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
+import { AnalyticsCountOrders } from '../analytics-count-order';
 import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [data, setData] = useState<string | null>(null);
-
   const { data: dataOrders } = useQuery({ queryKey: ['orders'], queryFn: findAllOrders, refetchInterval: 2000 })
   const { data: dataDevices } = useQuery({ queryKey: ['devices'], queryFn: findAllDevices, refetchInterval: 2000 })
 
-  const [activeOrders, totalOrderes, totalCounter] = useMemo(() => {
-    const active = dataOrders?.filter(order => order.status === 'ACTIVE').length || 0
-    const total = dataOrders?.length || 0
-
-    const count = dataOrders?.reduce((acc, current) => {
-      const { historics } = current;
-      if (historics) {
-        historics.forEach((historic) => {
-          if (historic.status === 'ON')
-            acc += historic.counter
-        })
-      }
-      return acc
-    }, 0)
-
-    return [active, total, count]
-  }, [dataOrders])
 
 
-  useEffect(() => {
-    const socketInstance = io('http://localhost:3001', {
-      transports: ['websocket'], // Garante o uso de WebSocket
-    });
+  const [activeOrders, totalOrders, totalCounter, groupedData] = useMemo(() => {
+    let active = 0;
+    let total = 0;
+    let count = 0;
 
-    setSocket(socketInstance);
+    const grouped: Record<string, { counter: number; updatedAt: Date; status: string }> = {};
 
-    // Listener para o evento "process-data"
-    socketInstance.on('process-data', (receivedData: string) => {
-      console.log('Dados recebidos:', receivedData);
-      setData(receivedData); // Atualiza o estado com os dados recebidos
-    });
+    if (Array.isArray(dataOrders)) {
+      total = dataOrders.length;
 
-    // Limpeza ao desmontar o componente
-    return () => {
-      socketInstance.disconnect();
-    };
-  }, []);
+      dataOrders.forEach(({ status, historics, productOrderId }) => {
+        if (status === 'ACTIVE') active += 1;
+
+        if (Array.isArray(historics)) {
+          count += historics.reduce((acc, { status: historicStatus, counter }) =>
+            historicStatus === 'ON' ? acc + counter : acc, 0);
+
+          // Obter o histórico mais recente
+          const latestHistoric = historics.reduce((latest, current) =>
+            new Date(current.updatedAt) > new Date(latest.updatedAt) ? current : latest,
+            historics[0]
+          );
+
+          // Adicionar ao agrupamento
+          if (productOrderId) {
+            grouped[productOrderId] = {
+              counter: latestHistoric?.counter,
+              updatedAt: latestHistoric?.updatedAt,
+              status: latestHistoric?.status,
+            };
+          }
+        }
+      });
+    }
+
+    console.log('grouped...', grouped)
+
+    return [active, total, count, grouped];
+  }, [dataOrders]);
 
   return (
     <DashboardContent maxWidth="xl">
@@ -74,7 +73,7 @@ export function OverviewAnalyticsView() {
           <AnalyticsWidgetSummary
             title="Total de Ordens"
             percent={2.6}
-            total={totalOrderes}
+            total={totalOrders}
             icon={<Iconify width={60} icon="solar:course-up-bold-duotone" />}
           />
         </Grid>
@@ -109,32 +108,14 @@ export function OverviewAnalyticsView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsCurrentVisits
-            title="Current visits"
-            chart={{
-              series: [
-                { label: 'America', value: 3500 },
-                { label: 'Asia', value: 2500 },
-                { label: 'Europe', value: 1500 },
-                { label: 'Africa', value: 500 },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsWebsiteVisits
-            title="Ordens x Contagens (Atual)"
-            subheader="Veja a contagem de cada ordem ativas no momento"
-            chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-              series: [
-                { name: 'Team A', data: [43, 33, 22, 37, 67, 68, 37, 24, 55] },
-                { name: 'Team B', data: [51, 70, 47, 67, 40, 37, 24, 70, 24] },
-              ],
-            }}
-          />
+        <Grid container spacing={2} sx={{ width: '100%' }}>
+          <Grid xs={12}>
+            <AnalyticsCountOrders
+              title="Ordens x Contagens (Atual)"
+              subheader="Veja a contagem de cada ordem ativas no momento"
+              data={groupedData}
+            />
+          </Grid>
         </Grid>
 
         {/* <Grid xs={12} md={6} lg={4}>

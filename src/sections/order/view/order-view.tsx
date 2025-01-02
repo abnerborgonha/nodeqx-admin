@@ -94,7 +94,7 @@ export function OrderView() {
                   { id: 'status', label: 'Status' },
                   { id: 'createdAt', label: 'Data Inicio' },
                   { id: 'updatedAt', label: 'Data Fim' },
-                  { id: '' },
+                  { id: 'device', label: 'Dipositivo' },
                 ]}
               />
               <TableBody>
