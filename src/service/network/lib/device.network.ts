@@ -7,6 +7,7 @@ export interface DeviceProps {
   availability: string
   status: string
   networkStatus: string
+  logs?: { title: string; info: string; timestamp: string }[];
   createdAt: Date
   updatedAt: Date
 }

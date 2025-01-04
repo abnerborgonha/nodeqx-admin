@@ -1,16 +1,17 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { useState, useCallback } from 'react';
+import { format, formatDistance } from 'date-fns';
 
 import Box from '@mui/material/Box';
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
 import MenuList from '@mui/material/MenuList';
-import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import { menuItemClasses } from '@mui/material/MenuItem';
-import { Table, Collapse, TableBody, TableHead, Typography } from '@mui/material';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import { Table, styled, Collapse, TableBody, TableHead, Typography, TableContainer } from '@mui/material';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -31,6 +32,27 @@ type OrderTableRowProps = {
   selected: boolean;
   onSelectRow: () => void;
 };
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
+
 
 export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
@@ -58,12 +80,12 @@ export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps
 
   return (
     <>
-      <TableRow hover tabIndex={-1} role="checkbox" selected={selected}>
-        <TableCell padding="checkbox">
+      <StyledTableRow hover tabIndex={-1} role="checkbox" selected={selected}>
+        <StyledTableCell padding="checkbox">
           <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
-        </TableCell>
+        </StyledTableCell>
 
-        <TableCell>
+        <StyledTableCell>
           <IconButton
             aria-label="expand row"
             size="small"
@@ -71,71 +93,81 @@ export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps
           >
             {openHistoric ? <Iconify icon="solar:alt-arrow-up-linear" /> : <Iconify icon="solar:alt-arrow-down-linear" />}
           </IconButton>
-        </TableCell>
+        </StyledTableCell>
 
-        <TableCell component="th" scope="row">
+        <StyledTableCell component="th" scope="row">
           <Box gap={2} display="flex" alignItems="center">
             {row.productOrderId}
           </Box>
-        </TableCell>
+        </StyledTableCell>
 
-        <TableCell>{row.name}</TableCell>
+        <StyledTableCell>{row.name}</StyledTableCell>
 
-        <TableCell>{row.description}</TableCell>
-
-        <TableCell>
+        <StyledTableCell>
           <Label color={(row.status === 'CLOSED' && 'error') || 'success'}>{row.status === 'ACTIVE' ? 'ATIVO' : 'FECHADO'}</Label>
-        </TableCell>
+        </StyledTableCell>
 
-        <TableCell>{format(row.createdAt, 'dd/MM/yyyy HH:mm')}</TableCell>
+        <StyledTableCell>{format(row.createdAt, 'dd/MM/yyyy HH:mm:ss:ms')}</StyledTableCell>
 
-        <TableCell>{format(row.updatedAt, 'dd/MM/yyyy HH:mm')}</TableCell>
+        <StyledTableCell>{format(row.updatedAt, 'dd/MM/yyyy HH:mm:ss:ms')}</StyledTableCell>
 
-        <TableCell>
-          <DeviceItem device={row.device} />
-        </TableCell>
+        <StyledTableCell>
+          {row.status === 'CLOSED' && <Label color="info">
+            {formatDistance(new Date(row.updatedAt), new Date(row.createdAt), { addSuffix: true, locale: ptBR })}
+          </Label>}
+        </StyledTableCell>
 
-        <TableCell align="right">
+        <StyledTableCell>
+          {row.status === 'ACTIVE' ? <DeviceItem device={row.device} simpleView /> : row.device.deviceId}
+        </StyledTableCell>
+
+        {/* <StyledTableCell>
+          <OrderDetail row={row} />
+        </StyledTableCell> */}
+
+        <StyledTableCell align="right">
           <IconButton onClick={handleOpenPopover}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        </StyledTableCell>
+      </StyledTableRow>
+      <StyledTableRow>
+        <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={openHistoric} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Typography variant="subtitle1" gutterBottom component="div">
                 Historico
               </Typography>
-              <Table size="small" aria-label="purchases">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Contagem</TableCell>
-                    <TableCell>Data/Hora</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.historics?.map((historyRow) => (
-                    <TableRow key={historyRow.id}>
-                      <TableCell component="th" scope="row">
-                        {statusHistoricOrder[historyRow.status]}
-                      </TableCell>
-                      <TableCell component="th" scope="row">
-                        {historyRow.counter}
-                      </TableCell>
-                      <TableCell component="th" scope="row">
-                        {format(historyRow.updatedAt, 'dd/MM/yyyy HH:mm:ss')}
-                      </TableCell>
+              <TableContainer sx={{ maxHeight: 200 }}>
+                <Table size="small" aria-label="purchases">
+                  <TableHead>
+                    <TableRow>
+                      <StyledTableCell>Status</StyledTableCell>
+                      <StyledTableCell>Contagem</StyledTableCell>
+                      <StyledTableCell>Data/Hora</StyledTableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {row.historics?.map((historyRow) => (
+                      <TableRow key={historyRow.id}>
+                        <StyledTableCell component="th" scope="row">
+                          {statusHistoricOrder[historyRow.status]}
+                        </StyledTableCell>
+                        <StyledTableCell component="th" scope="row">
+                          {historyRow.counter}
+                        </StyledTableCell>
+                        <StyledTableCell component="th" scope="row">
+                          {format(historyRow.updatedAt, 'dd/MM/yyyy HH:mm:ss:ms')}
+                        </StyledTableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Box>
           </Collapse>
-        </TableCell>
-      </TableRow>
+        </StyledTableCell>
+      </StyledTableRow>
 
       <Popover
         open={!!openPopover}
@@ -160,11 +192,13 @@ export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps
             },
           }}
         >
-          <OrderRedirect />
-          <OrderClose orderId={row.id} />
-          <OrderRemove orderId={row.id} />
+          {row.status === 'ACTIVE' && <OrderRedirect />}
+          {row.status === 'ACTIVE' && <OrderClose orderId={row.id} />}
+          {row.status === 'CLOSED' && <OrderRemove orderId={row.id} />}
         </MenuList>
       </Popover>
+
+
     </>
   );
 }

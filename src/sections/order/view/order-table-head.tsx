@@ -1,9 +1,10 @@
 import Box from '@mui/material/Box';
+import { styled } from '@mui/material';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
 import TableHead from '@mui/material/TableHead';
-import TableCell from '@mui/material/TableCell';
 import TableSortLabel from '@mui/material/TableSortLabel';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 
 import { visuallyHidden } from './utils';
 
@@ -19,6 +20,26 @@ type OrderTableHeadProps = {
   onSelectAllRows: (checked: boolean) => void;
 };
 
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.common.white,
+    color: theme.palette.grey,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
+
 export function OrderTableHead({
   order,
   onSort,
@@ -28,10 +49,12 @@ export function OrderTableHead({
   numSelected,
   onSelectAllRows,
 }: OrderTableHeadProps) {
+
+  
   return (
     <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox">
+      <StyledTableRow>
+        <StyledTableCell padding="checkbox">
           <Checkbox
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
@@ -39,12 +62,12 @@ export function OrderTableHead({
               onSelectAllRows(event.target.checked)
             }
           />
-        </TableCell>
+        </StyledTableCell>
 
-        <TableCell />
+        <StyledTableCell />
 
         {headLabel.map((headCell) => (
-          <TableCell
+          <StyledTableCell
             key={headCell.id}
             align={headCell.align || 'left'}
             sortDirection={orderBy === headCell.id ? order : false}
@@ -63,9 +86,9 @@ export function OrderTableHead({
                 </Box>
               ) : null}
             </TableSortLabel>
-          </TableCell>
+          </StyledTableCell>
         ))}
-      </TableRow>
+      </StyledTableRow>
     </TableHead>
   );
 }

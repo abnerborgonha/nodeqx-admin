@@ -90,11 +90,12 @@ export function OrderView() {
                 headLabel={[
                   { id: 'productOrderId', label: 'Nº da Ordem' },
                   { id: 'name', label: 'Titulo' },
-                  { id: 'description', label: 'Descrição' },
                   { id: 'status', label: 'Status' },
                   { id: 'createdAt', label: 'Data Inicio' },
                   { id: 'updatedAt', label: 'Data Fim' },
+                  { id: '', label: 'Tempo Total' },
                   { id: 'device', label: 'Dipositivo' },
+                  {label: ''}
                 ]}
               />
               <TableBody>
@@ -143,10 +144,10 @@ export function OrderView() {
 
 export function useTable() {
   const [page, setPage] = useState(0);
-  const [orderBy, setOrderBy] = useState('productOrderId');
+  const [orderBy, setOrderBy] = useState('createdAt');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selected, setSelected] = useState<string[]>([]);
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
 
   const onSort = useCallback(
     (id: string) => {

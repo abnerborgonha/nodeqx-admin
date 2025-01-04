@@ -6,14 +6,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
-import { Chip, Grid, Button, Tooltip, CardContent, CardActions } from '@mui/material';
+import { Grid, Button, Tooltip, CardContent, CardActions } from '@mui/material';
 
 import { removeDevice, type DeviceProps } from 'src/service/network/lib/device.network';
+
+import { Label } from 'src/components/label';
+
+import { LogDrawer } from './log';
 
 
 // ----------------------------------------------------------------------
 
-export function DeviceItem({ device: { id, availability, deviceId, networkStatus, createdAt, updatedAt } }: { device: DeviceProps }) {
+export function DeviceItem({ device: { id, availability, deviceId, networkStatus, status, logs, createdAt, updatedAt }, simpleView = false }: { device: DeviceProps, simpleView?: boolean }) {
+
   const [visableRemoveButton, setVisebleRemoveButton] = useState(false);
 
 
@@ -38,64 +43,68 @@ export function DeviceItem({ device: { id, availability, deviceId, networkStatus
     closeOrderMutation.mutate(dId);
   }
 
+
+  const labelNetworkStatus: Record<any, any> = {
+    'CONNECTED': <Label color="success">CONECTADO</Label>,
+    'DISCONNECTED': <Label color="error">DESCONECTADO</Label>,
+  }
+
+  const labelDeviceStatus: Record<any, any> = {
+    'AVAILABLE': <Label color="success">DISPONIVEL</Label>,
+    'UNAVAILABLE': <Label color="warning">INDISPONIVEL</Label>,
+  }
+
   return (
     <Card
       sx={{
-        borderRadius: 4,
+        borderRadius: 2,
         boxShadow: 3,
         maxWidth: 400,
-        padding: 2
       }}
     >
       <CardContent>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            textTransform: 'uppercase',
-            fontWeight: 'bold',
-            color: '#333',
-            marginBottom: 2,
-          }}
-        >
-          Dipositivo IoT: {deviceId}
-        </Typography>
+        <Box display='flex' justifyContent='space-between' alignItems='center' sx={{
+          marginBottom: 2,
+        }}>
+          <Typography variant="subtitle2">
+            {deviceId}
+          </Typography>
+          <LogDrawer device={ { id, availability, deviceId, status, networkStatus, logs, createdAt, updatedAt }} />
+        </Box>
         <Box
           sx={{
             display: 'flex',
-            flexDirection: 'column',
+            justifyContent: 'space-between',
             gap: 1,
             marginBottom: 2,
           }}
         >
-          <Chip
-            label={`Network: ${networkStatus === 'CONNECTED' ? 'CONECTADO' : 'DESCONECTADO'}`}
-            color={networkStatus === 'CONNECTED' ? 'success' : 'error'}
-            size="small"
-            sx={{ width: 'fit-content' }}
-          />
-          <Chip
-            label={`Disponibilidade: ${availability === 'AVAILABLE' ? 'DISPONIVEL' : 'INDIPONIVEL'}`}
-            color={availability === 'AVAILABLE' ? 'success' : 'warning'}
-            size="small"
-            sx={{ width: 'fit-content' }}
-          />
+          <Typography variant="caption" sx={{ color: '#888' }}>
+            Network: {labelNetworkStatus[networkStatus]}
+          </Typography>
+
+          <Typography variant="caption" sx={{ color: '#888' }}>
+            Status: {labelDeviceStatus[availability]}
+          </Typography>
+
         </Box>
-        <Grid container spacing={1}>
-          <Grid item xs={6}>
-            <Typography variant="caption" sx={{ color: '#888' }}>
-              Criado: {format(createdAt, 'dd/MM/yyyy HH:mm:ss')}
-            </Typography>
-          </Grid>
-          <Grid item xs={6}>
-            <Typography variant="caption" sx={{ color: '#888' }}>
-              Atualizado: {format(updatedAt, 'dd/MM/yyyy HH:mm:ss')}
-            </Typography>
+        <Grid container spacing={1} style={{ display: `${simpleView && 'none'}` }}>
+          <Grid item>
+            <Box display='flex' flexDirection='column' gap='6px'>
+              <Typography variant="caption" sx={{ color: '#888' }}>
+                Criado: {format(createdAt, 'dd/MM/yyyy HH:mm:ss')}
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#888' }}>
+                Atualizado: {format(updatedAt, 'dd/MM/yyyy HH:mm:ss')}
+              </Typography>
+            </Box>
           </Grid>
         </Grid>
       </CardContent>
-      <CardActions>
+      <CardActions style={{ display: `${simpleView ? 'none' : 'flex'}`, justifyContent: 'space-between' }}>
         {!visableRemoveButton && <Button size="small" onClick={() => setVisebleRemoveButton(prev => !prev)}>Excluir</Button>}
         {visableRemoveButton && <Tooltip title="Ao excluir não será mias possivel utilizar esse dipositivo. (Clique duas vezes caso queria excluir)"><Button size="small" color="error" onDoubleClick={() => handleRemoveDevice(id)} >Excluir</Button></Tooltip>}
+
       </CardActions>
     </Card>
   );

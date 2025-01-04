@@ -1,8 +1,10 @@
 import type { CardProps } from '@mui/material/Card';
 
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import { useTheme } from '@mui/material/styles';
 import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
 
 import { Chart, useChart } from 'src/components/chart';
 
@@ -27,8 +29,8 @@ export function AnalyticsCountOrders({ title, subheader, data, ...other }: Props
   // Define cores para os status
   const statusColors: Record<string, string> = {
     ON: theme.palette.success.main,
-    OFF: theme.palette.warning.main,
-    PAUSE: theme.palette.info.main,
+    OFF: theme.palette.divider,
+    PAUSE: theme.palette.warning.main,
     EMERGENCY: theme.palette.error.main,
   };
 
@@ -47,6 +49,9 @@ export function AnalyticsCountOrders({ title, subheader, data, ...other }: Props
     plotOptions: {
       bar: {
         distributed: true, // Ativa cores distintas por barra
+        dataLabels: {
+          position: 'top', // Posição dos data labels
+        },
       },
     },
     colors: chartColors, // Aplica as cores dinâmicas
@@ -69,6 +74,15 @@ export function AnalyticsCountOrders({ title, subheader, data, ...other }: Props
         },
       },
     },
+    dataLabels: {
+      enabled: true,
+      formatter: (val: number) => val.toString(),
+      offsetY: -20,
+      style: {
+        fontSize: '12px',
+        colors: ['#304758'],
+      },
+    },
   });
 
   return (
@@ -82,6 +96,15 @@ export function AnalyticsCountOrders({ title, subheader, data, ...other }: Props
         height={364}
         sx={{ py: 2.5, pl: 1, pr: 2.5 }}
       />
+
+      <Box sx={{ display: 'flex', justifyContent: 'center', m: 2 }}>
+        {Object.entries(statusColors).map(([status, color]) => (
+          <Box key={status} sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+            <Box sx={{ width: 16, height: 16, backgroundColor: color, mr: 1, borderRadius: '50%' }} />
+            <Typography variant="body2">{status}</Typography>
+          </Box>
+        ))}
+      </Box>
     </Card>
   );
 }

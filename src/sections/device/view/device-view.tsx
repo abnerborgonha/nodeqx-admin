@@ -22,7 +22,7 @@ export function DeviceView() {
   return (
     <DashboardContent>
       <Typography variant="h4" sx={{ mb: 5 }}>
-        Dipositivos IoT
+        Dispositivos IoT
       </Typography>
 
       <Grid container spacing={3}>

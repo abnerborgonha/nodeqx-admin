@@ -27,6 +27,7 @@ export function OrderClose({ orderId }: { orderId: string }) {
         variant: 'success'
       });
       queryClient.invalidateQueries({ queryKey: ['orders'] }); // Refresh order list on success
+      handleClose();
     },
     onError: (error) => {
       enqueueSnackbar(error.message, {
