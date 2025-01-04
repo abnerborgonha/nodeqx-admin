@@ -192,7 +192,7 @@ export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps
             },
           }}
         >
-          {row.status === 'ACTIVE' && <OrderRedirect />}
+          {row.status === 'ACTIVE' && <OrderRedirect orderId={row.id} />}
           {row.status === 'ACTIVE' && <OrderClose orderId={row.id} />}
           {row.status === 'CLOSED' && <OrderRemove orderId={row.id} />}
         </MenuList>

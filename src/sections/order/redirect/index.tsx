@@ -1,5 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import type { CreateOrderProps } from 'src/service/network/lib/order.network';
 
 import React from 'react';
 import { useSnackbar } from 'notistack';
@@ -13,12 +12,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import { Grid, Select, MenuItem, InputLabel, FormControl, CircularProgress } from '@mui/material';
 
-import { createOrder } from 'src/service/network/lib/order.network';
+import { redirectOrder } from 'src/service/network/lib/order.network';
 import { findAllDevices } from 'src/service/network/lib/device.network';
 
 import { Iconify } from 'src/components/iconify';
 
-export function OrderRedirect() {
+export function OrderRedirect({ orderId }: { orderId: string }) {
   const [open, setOpen] = React.useState(false);
   const [deviceId, setDeviceId] = React.useState('');
 
@@ -30,20 +29,20 @@ export function OrderRedirect() {
   });
 
   const queryClient = useQueryClient();
-  const createOrderMutation = useMutation({
-    mutationFn: createOrder,
+  const redirectOrderMutation = useMutation({
+    mutationFn: redirectOrder,
     onSuccess: () => {
-      enqueueSnackbar('Ordem criada com sucesso!', {
+      enqueueSnackbar('Ordem redirecionada com sucesso!', {
         variant: 'success'
       });
-      queryClient.invalidateQueries({ queryKey: ['orders'] }); // Refresh order list on success
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
       handleClose();
     },
     onError: (error) => {
       enqueueSnackbar(error.message, {
         variant: 'error'
       });
-      console.error('Failed to create order:', { error });
+      console.error('Failed to redirect order:', { error });
     },
   });
 
@@ -62,11 +61,9 @@ export function OrderRedirect() {
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const formJson = Object.fromEntries(formData.entries()) as unknown as CreateOrderProps;
 
-    createOrderMutation.mutate({
-      ...formJson,
+    redirectOrderMutation.mutate({
+      id: orderId,
       deviceId
     });
   };
@@ -93,36 +90,36 @@ export function OrderRedirect() {
           </DialogContentText>
 
           <Grid container spacing={1} marginTop={2}>
-              <FormControl fullWidth margin="dense">
-                <InputLabel id="device-iot-label">Dispositivo IoT</InputLabel>
-                {isLoadingDevices ? (
-                  <CircularProgress size={24} />
-                ) : isErrorDevices ? (
-                  <p>Erro ao carregar dispositivos</p>
-                ) : (
-                  <Select
-                    label="Dipositivo IoT"
-                    labelId="device-iot-label"
-                    id="deviceId"
-                    value={deviceId}
-                    onChange={(e) => setDeviceId(e.target.value)}
-                    fullWidth
-                  >
-                    {devices.map((device) => (
-                      <MenuItem key={device.id} value={device.deviceId}>
-                        {device.deviceId}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                )}
-              </FormControl>
+            <FormControl fullWidth margin="dense">
+              <InputLabel id="device-iot-label">Dispositivo IoT</InputLabel>
+              {isLoadingDevices ? (
+                <CircularProgress size={24} />
+              ) : isErrorDevices ? (
+                <p>Erro ao carregar dispositivos</p>
+              ) : (
+                <Select
+                  label="Dipositivo IoT"
+                  labelId="device-iot-label"
+                  id="deviceId"
+                  value={deviceId}
+                  onChange={(e) => setDeviceId(e.target.value)}
+                  fullWidth
+                >
+                  {devices.map((device) => (
+                    <MenuItem key={device.id} value={device.deviceId}>
+                      {device.deviceId}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            </FormControl>
           </Grid>
         </DialogContent>
 
         <DialogActions>
           <Button onClick={handleClose}>Cancelar</Button>
-          <Button type="submit" disabled={createOrderMutation.isPending}>
-            {createOrderMutation.isPending ? 'Enviando...' : 'Enviar'}
+          <Button type="submit" disabled={redirectOrderMutation.isPending}>
+            {redirectOrderMutation.isPending ? 'Enviando...' : 'Enviar'}
           </Button>
         </DialogActions>
       </Dialog>
