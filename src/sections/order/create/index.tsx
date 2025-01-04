@@ -76,7 +76,7 @@ export function OrderCreate() {
     <>
       <Button
         variant="contained"
-        color="inherit"
+        color="primary"
         startIcon={<Iconify icon="mingcute:add-line" />}
         onClick={handleClickOpen}
       >
