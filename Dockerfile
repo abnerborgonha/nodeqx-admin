@@ -8,13 +8,13 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Instala as dependências
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copia todo o código do projeto
 COPY . .
 
 # Expõe a porta padrão do Vite
-EXPOSE 5173
+EXPOSE 3039
 
 # Define o comando padrão para rodar o servidor de desenvolvimento
 CMD ["npm", "run", "build"]

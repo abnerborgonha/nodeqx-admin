@@ -1,10 +1,10 @@
 version: '3.8'
 
 services:
-  vite-app:
+  node-qx-admin:
     build:
       context: . # Diretório onde está o Dockerfile
-    container_name: vite-app-container
+    container_name: node-qx-admin
     working_dir: /usr/src/app
     environment:
       VITE_API_BASE_URL: "http://nestjs:3000"
@@ -12,5 +12,5 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     ports:
-      - "5173:5173" # Porta do servidor Vite
-    command: sh -c "npm run dev"
+      - "3039:3039" # Porta do servidor Vite
+    command: sh -c "npm run start"
