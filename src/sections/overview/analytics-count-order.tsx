@@ -1,3 +1,4 @@
+
 import type { CardProps } from '@mui/material/Card';
 
 import React, { useState } from 'react';
@@ -14,27 +15,22 @@ import FormControl from '@mui/material/FormControl';
 
 import { Chart, useChart } from 'src/components/chart';
 
+import type { Stream } from './view';
+
 // ----------------------------------------------------------------------
 
 type Props = CardProps & {
   title?: string;
   subheader?: string;
-  data: Record<
-    string,
-    {
-      counter: number;
-      status: string;
-      updatedAt: Date;
-    }
-  >;
+  data: Stream[];
 };
 
 function StatusItem({ status, color }: { status: string, color: string }) {
   return (
-  <Box key={status} sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-    <Box sx={{ width: 16, height: 16, backgroundColor: color, mr: 1, borderRadius: '50%' }} />
-    <Typography variant="body2">{status}</Typography>
-  </Box>
+    <Box key={status} sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+      <Box sx={{ width: 16, height: 16, backgroundColor: color, mr: 1, borderRadius: '50%' }} />
+      <Typography variant="body2">{status}</Typography>
+    </Box>
   )
 }
 
@@ -45,26 +41,25 @@ export function AnalyticsCountOrders({ title, subheader, data, ...other }: Props
   // Define cores para os status
   const statusColors: Record<string, string> = {
     ON: theme.palette.success.main,
-    OFF: theme.palette.divider,
+    // OFF: theme.palette.divider,
     PAUSE: theme.palette.warning.main,
-    EMERGENCY: theme.palette.error.main,
+    // EMERGENCY: theme.palette.error.main,
   };
 
   // Filtra os dados com base no status selecionado
-  const filteredData = selectedStatus === 'ALL' ? data : Object.fromEntries(
-    Object.entries(data).filter(([_, value]) => value.status === selectedStatus)
-  );
+  const filteredData = selectedStatus === 'ALL' ? data :
+    data.filter((value) => value.status === selectedStatus)
 
   // Prepara os dados do gráfico
-  const categories = Object.keys(filteredData); // productOrderIds
+  const categories = filteredData.map((f) => f.order) // productOrderIds
   const series = [
     {
       name: 'Orders',
-      data: categories.map((key) => filteredData[key].counter), // Counter para cada productOrderId
+      data: filteredData.map(f => f.counter), // Counter para cada productOrderId
     },
   ];
 
-  const chartColors = categories.map((key) => statusColors[filteredData[key].status] || theme.palette.grey[500]);
+  const chartColors = filteredData.map(f => statusColors[f.status]) || theme.palette.grey[500];
 
   const chartOptions = useChart({
     plotOptions: {
@@ -90,8 +85,9 @@ export function AnalyticsCountOrders({ title, subheader, data, ...other }: Props
       y: {
         formatter: (value: number, { dataPointIndex }: { dataPointIndex: number }) => {
           const productId = categories[dataPointIndex];
-          const { status, counter, updatedAt } = filteredData[productId];
-          return `${counter} Counts | Status: ${status} | ${new Date(updatedAt).toLocaleString()}`;
+          const formatterData = filteredData.find(f => f.order === productId);
+          const { status, counter } = formatterData || {};
+          return `${counter} Counts | Status: ${status}`;
         },
       },
     },
@@ -119,7 +115,7 @@ export function AnalyticsCountOrders({ title, subheader, data, ...other }: Props
             <MenuItem value="ALL">Todos</MenuItem>
             {Object.entries(statusColors).map(([status, color], index) => (
               <MenuItem key={status} value={status}>
-                  <StatusItem key={`${index}-${status}`} status={status} color={color}/>
+                <StatusItem key={`${index}-${status}`} status={status} color={color} />
               </MenuItem>
             ))}
           </Select>
@@ -135,7 +131,7 @@ export function AnalyticsCountOrders({ title, subheader, data, ...other }: Props
 
       <Box sx={{ display: 'flex', justifyContent: 'center', m: 2 }}>
         {Object.entries(statusColors).map(([status, color], index) => (
-          <StatusItem key={index} status={status} color={color}/>
+          <StatusItem key={index} status={status} color={color} />
         ))}
       </Box>
     </Card>

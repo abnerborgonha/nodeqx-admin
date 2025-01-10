@@ -1,12 +1,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { useMemo } from 'react';
+import { io } from 'socket.io-client';
 import { useQuery } from '@tanstack/react-query';
+import { useState, Suspense, useEffect } from 'react';
 
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { findAllOrders } from 'src/service/network/lib/order.network';
 import { findAllDevices } from 'src/service/network/lib/device.network';
 
 import { Iconify } from 'src/components/iconify';
@@ -16,51 +16,57 @@ import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 
 // ----------------------------------------------------------------------
 
+type StreamStatus = 'ON' | 'PAUSE' | 'EMERGENCY' | 'STOP' | 'OFF';
+
+export type Stream = {
+  device: string;
+  order: string;
+  counter: number;
+  status: StreamStatus;
+}
+
+
 export function OverviewAnalyticsView() {
-  const { data: dataOrders } = useQuery({ queryKey: ['orders'], queryFn: findAllOrders, refetchInterval: 2000 })
-  const { data: dataDevices } = useQuery({ queryKey: ['devices'], queryFn: findAllDevices, refetchInterval: 2000 })
+  const [stream, setStream] = useState<Stream[]>([]);
+  const [activeOrders, setActiveOrders] = useState<number>(0);
+  const [totalCounter, setTotalCounter] = useState<number>(0);
+  const [totalOrders, setTotalOrders] = useState<number>(0);
 
 
+  const { data: dataDevices } = useQuery({ queryKey: ['devices'], queryFn: findAllDevices })
 
-  const [activeOrders, totalOrders, totalCounter, groupedData] = useMemo(() => {
-    let active = 0;
-    let total = 0;
-    let count = 0;
+  useEffect(() => {
+    const socket = io('http://localhost:3000');
 
-    const grouped: Record<string, { counter: number; updatedAt: Date; status: string }> = {};
+    socket.on('connect', () => {
+      console.log('Connected to socket server');
+    });
 
-    if (Array.isArray(dataOrders)) {
-      total = dataOrders.length;
+    socket.on('disconnect', () => {
+      console.log('Disconnected from socket server');
+    });
 
-      dataOrders.forEach(({ status, historics, productOrderId }) => {
-        if (status === 'ACTIVE') active += 1;
+    socket.on('orders', (data: Stream[]) => {
+      setStream(data);
+    });
 
-        if (Array.isArray(historics)) {
-          count += historics.reduce((acc, { status: historicStatus, counter }) =>
-            historicStatus === 'ON' ? acc + counter : acc, 0);
+    socket.on('total-active-orders', (data: number) => {
+      setActiveOrders(data);
+    });
 
-          // Obter o histórico mais recente
-          const latestHistoric = historics.reduce((latest, current) =>
-            new Date(current.updatedAt) > new Date(latest.updatedAt) ? current : latest,
-            historics[0]
-          );
+    socket.on('total-counts', (data: number) => {
+      setTotalCounter(data);
+    });
 
-          // Adicionar ao agrupamento
-          if (productOrderId) {
-            grouped[productOrderId] = {
-              counter: latestHistoric?.counter,
-              updatedAt: latestHistoric?.updatedAt,
-              status: latestHistoric?.status,
-            };
-          }
-        }
-      });
+    socket.on('total-orders', (data: number) => {
+      setTotalOrders(data);
+    })
+
+    return () => {
+      socket.disconnect();
     }
-
-    console.log('grouped...', grouped)
-
-    return [active, total, count, grouped];
-  }, [dataOrders]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <DashboardContent maxWidth="xl">
@@ -100,7 +106,7 @@ export function OverviewAnalyticsView() {
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="Total de contagens"
+            title="Total de Contagens Ativas"
             percent={3.6}
             total={totalCounter || 0}
             color="error"
@@ -110,11 +116,13 @@ export function OverviewAnalyticsView() {
 
         <Grid container spacing={2} sx={{ width: '100%' }}>
           <Grid xs={12}>
-            <AnalyticsCountOrders
-              title="Ordens x Contagens (Atual)"
-              subheader="Veja a contagem de cada ordem ativas no momento"
-              data={groupedData}
-            />
+            <Suspense fallback={<h1>Loading...</h1>}>
+              <AnalyticsCountOrders
+                title="Ordens x Contagens (Atual)"
+                subheader="Veja a contagem de cada ordem ativas no momento"
+                data={stream}
+              />
+            </Suspense>
           </Grid>
         </Grid>
 
