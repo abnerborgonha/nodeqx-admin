@@ -16,7 +16,6 @@ export function DeviceView() {
   const { data: devices = [] } = useQuery({
     queryKey: ['devices'],
     queryFn: findAllDevices,
-    refetchInterval: 1000
   });
 
   return (

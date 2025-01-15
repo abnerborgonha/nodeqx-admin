@@ -1,8 +1,7 @@
-import type { DeviceProps } from 'src/service/network/lib/device.network';
-
 import { format } from 'date-fns';
 import { Icon } from '@iconify/react';
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import {
   Box,
@@ -14,13 +13,21 @@ import {
   Typography
 } from '@mui/material';
 
+import { findDeviceLogs, type DeviceProps } from 'src/service/network/lib/device.network';
+
 import { Label } from 'src/components/label';
 
 export const LogDrawer = ({ device }: { device: DeviceProps }) => {
+  const { data, isLoading, error, isError, refetch } = useQuery({ queryKey: ['device-logs'], queryFn: () => findDeviceLogs(device.id), enabled: false })
+
   const anchor = 'right';
   const [state, setState] = useState({ [anchor]: false });
 
   const toggleDrawer = (open: boolean) => () => {
+    if (open) {
+      refetch();
+    }
+
     setState({ ...state, [anchor]: open });
   };
 
@@ -60,23 +67,36 @@ export const LogDrawer = ({ device }: { device: DeviceProps }) => {
       <Box
         sx={{
           display: 'flex',
-          flexDirection: 'column',
-          gap: 1,
           marginBottom: 2,
+          justifyContent: 'space-between',
         }}
       >
-        <Typography variant="caption" sx={{ color: '#888' }}>
-          Network: {labelNetworkStatus[device.networkStatus]}
-        </Typography>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+        }}>
+          <Typography variant="caption" sx={{ color: '#888' }}>
+            Network: {labelNetworkStatus[device.networkStatus]}
+          </Typography>
 
-        <Typography variant="caption" sx={{ color: '#888' }}>
-          Status: {labelDeviceStatus[device.availability]}
-        </Typography>
+          <Typography variant="caption" sx={{ color: '#888' }}>
+            Status: {labelDeviceStatus[device.availability]}
+          </Typography>
+        </Box>
+
+        <Button
+          onClick={() => refetch()}
+          size='small'
+          variant="text"
+          color="primary"
+          startIcon={<Icon icon="mdi:refresh" fontSize={24} />}
+        >Atualizar</Button>
 
       </Box>
       <Box sx={{ flex: 1, overflowY: 'auto' }}>
         <List>
-          {device.logs?.map(({ title, info, timestamp }, index) => (
+          {data?.map(({ title, info, createdAt }, index) => (
             <ListItem key={index} divider>
               <Box sx={{ display: 'flex', width: '100%' }}>
                 <Box sx={{ flex: 1 }}>
@@ -91,7 +111,7 @@ export const LogDrawer = ({ device }: { device: DeviceProps }) => {
                 </Box>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="body2" fontFamily="monospace" width={100}>
-                    {format(new Date(timestamp), 'dd/MM/yyyy HH:mm:ss:ms')}
+                    {format(new Date(createdAt), 'dd/MM/yyyy HH:mm:ss:ms')}
                   </Typography>
                 </Box>
               </Box>

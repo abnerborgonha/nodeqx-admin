@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import type { DeviceStream } from 'src/contexts/device-stream.context';
+
 import { format } from 'date-fns';
+import { useState, useEffect } from 'react';
 import { enqueueSnackbar } from 'notistack';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -7,6 +9,8 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import { Grid, Button, Tooltip, CardContent, CardActions } from '@mui/material';
+
+import { useDeviceStream } from 'src/hooks/use-device-stream';
 
 import { removeDevice, type DeviceProps } from 'src/service/network/lib/device.network';
 
@@ -17,10 +21,11 @@ import { LogDrawer } from './log';
 
 // ----------------------------------------------------------------------
 
-export function DeviceItem({ device: { id, availability, deviceId, networkStatus, status, logs, createdAt, updatedAt }, simpleView = false }: { device: DeviceProps, simpleView?: boolean }) {
+export function DeviceItem({ device: { id, availability, deviceId, networkStatus, status, createdAt, updatedAt }, simpleView = false }: { device: DeviceProps, simpleView?: boolean }) {
 
+  const { deviceStream} = useDeviceStream();
   const [visableRemoveButton, setVisebleRemoveButton] = useState(false);
-
+  const [statusDeviceStream, setStatusDeviceStream] = useState<Partial<DeviceStream>>();
 
   const queryClient = useQueryClient();
   const closeOrderMutation = useMutation({
@@ -54,6 +59,11 @@ export function DeviceItem({ device: { id, availability, deviceId, networkStatus
     'UNAVAILABLE': <Label color="warning">INDISPONIVEL</Label>,
   }
 
+  useEffect(() => {
+    const data = deviceStream[deviceId];
+    setStatusDeviceStream(data)
+  }, [deviceStream, deviceId])
+
   return (
     <Card
       sx={{
@@ -69,7 +79,7 @@ export function DeviceItem({ device: { id, availability, deviceId, networkStatus
           <Typography variant="subtitle2">
             {deviceId}
           </Typography>
-          <LogDrawer device={ { id, availability, deviceId, status, networkStatus, logs, createdAt, updatedAt }} />
+          <LogDrawer device={{ id, availability, deviceId, status, networkStatus, createdAt, updatedAt }} />
         </Box>
         <Box
           sx={{
@@ -80,11 +90,11 @@ export function DeviceItem({ device: { id, availability, deviceId, networkStatus
           }}
         >
           <Typography variant="caption" sx={{ color: '#888' }}>
-            Network: {labelNetworkStatus[networkStatus]}
+            Network: {labelNetworkStatus[statusDeviceStream?.networkStatus || networkStatus]}
           </Typography>
 
           <Typography variant="caption" sx={{ color: '#888' }}>
-            Status: {labelDeviceStatus[availability]}
+            Status: {labelDeviceStatus[statusDeviceStream?.availability || availability]}
           </Typography>
 
         </Box>

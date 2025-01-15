@@ -1,7 +1,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import { io } from 'socket.io-client';
 import { useSnackbar } from 'notistack';
-import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -30,9 +31,19 @@ import type { OrderProps } from '../types/order.type';
 
 // ----------------------------------------------------------------------
 
+type OrderProcessStatus = 'CREATED' | 'PENDING' | 'CLOSED';
+
+type OrderProcess = {
+  id: string;
+  productOrderId: string;
+  status: OrderProcessStatus;
+};
+
 export function OrderView() {
-  const { data, isLoading, error, isError } = useQuery({ queryKey: ['orders'], queryFn: findAllOrders, refetchInterval: 2000 })
+  const { data, isLoading, error, isError, refetch } = useQuery({ queryKey: ['orders'], queryFn: findAllOrders })
   const _orders = data || [];
+
+  const [pendingOrderProcess, setPendingOrderProcess] = useState<OrderProcess>({} as unknown as OrderProcess);
 
   const table = useTable();
   const { enqueueSnackbar } = useSnackbar();
@@ -52,6 +63,26 @@ export function OrderView() {
       variant: 'error'
     });
   }
+
+  useEffect(() => {
+    const socket = io(import.meta.env.VITE_API_BASE_URL);
+
+    socket.on('order-process', (orderProcess: OrderProcess) => {
+      if (orderProcess.status === 'PENDING') {
+        setPendingOrderProcess(orderProcess);
+      }
+
+      if (orderProcess.status === 'CLOSED') {
+        refetch();
+        setPendingOrderProcess(orderProcess);
+      }
+    })
+
+    return () => {
+      socket.disconnect();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <DashboardContent>
@@ -93,9 +124,9 @@ export function OrderView() {
                   { id: 'status', label: 'Status' },
                   { id: 'createdAt', label: 'Data Inicio' },
                   { id: 'updatedAt', label: 'Data Fim' },
-                  { id: '', label: 'Tempo Total' },
+                  { id: 'totalTime', label: 'Tempo Total' },
                   { id: 'device', label: 'Dipositivo' },
-                  {label: ''}
+                  { label: '' }
                 ]}
               />
               <TableBody>
@@ -110,6 +141,7 @@ export function OrderView() {
                       row={row}
                       selected={table.selected.includes(row.id)}
                       onSelectRow={() => table.onSelectRow(row.id)}
+                      disabled={!!(pendingOrderProcess.id === row.id && pendingOrderProcess.status === 'PENDING')}
                     />
                   ))}
 

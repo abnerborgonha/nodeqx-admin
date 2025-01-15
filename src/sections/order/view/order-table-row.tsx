@@ -30,6 +30,7 @@ import type { OrderProps } from '../types/order.type';
 type OrderTableRowProps = {
   row: OrderProps;
   selected: boolean;
+  disabled: boolean;
   onSelectRow: () => void;
 };
 
@@ -50,11 +51,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   // hide last border
   '&:last-child td, &:last-child th': {
     border: 0,
-  },
+  }
 }));
 
 
-export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps) {
+export function OrderTableRow({ row, selected, disabled=false, onSelectRow }: OrderTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const [openHistoric, setOpenHistoric] = useState<boolean>(false);
 
@@ -80,7 +81,11 @@ export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps
 
   return (
     <>
-      <StyledTableRow hover tabIndex={-1} role="checkbox" selected={selected}>
+      <StyledTableRow hover tabIndex={-1} role="checkbox" selected={selected} style={{
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        pointerEvents: disabled ? 'none' : 'auto',
+      }}>
         <StyledTableCell padding="checkbox">
           <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
         </StyledTableCell>
@@ -120,10 +125,6 @@ export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps
         <StyledTableCell>
           {row.status === 'ACTIVE' ? <DeviceItem device={row.device} simpleView /> : row.device.deviceId}
         </StyledTableCell>
-
-        {/* <StyledTableCell>
-          <OrderDetail row={row} />
-        </StyledTableCell> */}
 
         <StyledTableCell align="right">
           <IconButton onClick={handleOpenPopover}>

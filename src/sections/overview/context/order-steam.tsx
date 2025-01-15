@@ -19,7 +19,7 @@ interface StreamContextProps {
 const StreamContext = createContext<StreamContextProps | undefined>(undefined);
 
 export const StreamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const socket = io('http://localhost:3000', {
+  const socket = io(import.meta.env.VITE_API_BASE_URL, {
     reconnectionDelay: 5000
   });
   const [stream, setStream] = useState<Map<string, Stream>>(new Map());

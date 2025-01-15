@@ -36,7 +36,7 @@ export function OverviewAnalyticsView() {
   const { data: dataDevices } = useQuery({ queryKey: ['devices'], queryFn: findAllDevices })
 
   useEffect(() => {
-    const socket = io('http://localhost:3000');
+    const socket = io(import.meta.env.VITE_API_BASE_URL);
 
     socket.on('connect', () => {
       console.log('Connected to socket server');

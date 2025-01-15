@@ -11,6 +11,8 @@ import { useScrollToTop } from 'src/hooks/use-scroll-to-top';
 
 import { ThemeProvider } from 'src/theme/theme-provider';
 
+import { DeviceStreamProvider } from './contexts/device-stream.context';
+
 // ----------------------------------------------------------------------
 
 
@@ -20,13 +22,15 @@ export default function App() {
 
 
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <SnackbarProvider maxSnack={3}>
-          <Router />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </SnackbarProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <DeviceStreamProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <SnackbarProvider maxSnack={3}>
+            <Router />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </SnackbarProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </DeviceStreamProvider>
   );
 }
