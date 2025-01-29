@@ -47,6 +47,7 @@ export function OverviewAnalyticsView() {
     });
 
     socket.on('orders', (data: Stream[]) => {
+      console.log('[STREAM ORDERS]', data);
       setStream(data);
     });
 

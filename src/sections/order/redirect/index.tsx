@@ -71,7 +71,7 @@ export function OrderRedirect({ orderId }: { orderId: string }) {
   return (
     <>
       <MenuItem onClick={handleClickOpen}>
-        <Iconify icon="solar:login-3-broken" />
+        <Iconify icon="solar:square-arrow-right-bold-duotone" />
         Redirecionar
       </MenuItem>
 

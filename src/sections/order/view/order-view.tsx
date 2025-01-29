@@ -31,7 +31,7 @@ import type { OrderProps } from '../types/order.type';
 
 // ----------------------------------------------------------------------
 
-type OrderProcessStatus = 'CREATED' | 'PENDING' | 'CLOSED';
+type OrderProcessStatus = 'CREATED' | 'PENDING' | 'CLOSED' | 'IN-SETUP' | 'OUT-SETUP';
 
 type OrderProcess = {
   id: string;
@@ -68,8 +68,23 @@ export function OrderView() {
     const socket = io(import.meta.env.VITE_API_BASE_URL);
 
     socket.on('order-process', (orderProcess: OrderProcess) => {
+      
+      if (orderProcess.status === 'CREATED') { 
+        refetch();
+      }
+
       if (orderProcess.status === 'PENDING') {
         setPendingOrderProcess(orderProcess);
+      }
+      
+      if (orderProcess.status === 'IN-SETUP') { 
+        refetch();
+        setPendingOrderProcess({} as unknown as OrderProcess);
+      }
+
+      if (orderProcess.status === 'OUT-SETUP') { 
+        refetch();
+        setPendingOrderProcess({} as unknown as OrderProcess);
       }
 
       if (orderProcess.status === 'CLOSED') {

@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ptBR } from 'date-fns/locale';
-import { useState, useCallback } from 'react';
 import { format, formatDistance } from 'date-fns';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Popover from '@mui/material/Popover';
@@ -11,7 +11,7 @@ import MenuList from '@mui/material/MenuList';
 import IconButton from '@mui/material/IconButton';
 import { menuItemClasses } from '@mui/material/MenuItem';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import { Table, styled, Collapse, TableBody, TableHead, Typography, TableContainer } from '@mui/material';
+import { Table, Alert, styled, Collapse, TableBody, TableHead, Typography, TableContainer } from '@mui/material';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -19,6 +19,7 @@ import { Iconify } from 'src/components/iconify';
 import { DeviceItem } from 'src/sections/device/device-item';
 
 import { OrderClose } from '../close';
+import { OrderSetup } from '../setup';
 import { OrderRemove } from '../remove';
 import { OrderRedirect } from '../redirect';
 
@@ -55,9 +56,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 
-export function OrderTableRow({ row, selected, disabled=false, onSelectRow }: OrderTableRowProps) {
+export function OrderTableRow({ row, selected, disabled = false, onSelectRow }: OrderTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const [openHistoric, setOpenHistoric] = useState<boolean>(false);
+
+  const [inSetup, setInSetup] = useState<boolean>(false);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
@@ -76,8 +79,17 @@ export function OrderTableRow({ row, selected, disabled=false, onSelectRow }: Or
     'PAUSE': <Label color="warning">PAUSE</Label>,
     'EMERGENCY': <Label color="error">EMERGENCY</Label>,
     'STOP': <Label color="info">STOP</Label>,
+    'SETUP': <Label color="secondary">SETUP</Label>,
     'OFF': <Label color="default">OFF</Label>
   }
+
+  useEffect(() => {
+    if (row.historics?.[0]?.status === 'SETUP') {
+      setInSetup(true);
+    } else {
+      setInSetup(false);
+    }
+  }, [row])
 
   return (
     <>
@@ -131,9 +143,16 @@ export function OrderTableRow({ row, selected, disabled=false, onSelectRow }: Or
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </StyledTableCell>
+
       </StyledTableRow>
+      <StyledTableCell colSpan={12}>
+        {inSetup && <Alert severity='warning'>Maquina em setup. Dipositivo IoT não está registrando contagem no momento</Alert>}
+      </StyledTableCell>
+
+
+
       <StyledTableRow>
-        <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
           <Collapse in={openHistoric} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Typography variant="subtitle1" gutterBottom component="div">
@@ -170,6 +189,9 @@ export function OrderTableRow({ row, selected, disabled=false, onSelectRow }: Or
         </StyledTableCell>
       </StyledTableRow>
 
+
+
+
       <Popover
         open={!!openPopover}
         anchorEl={openPopover}
@@ -182,7 +204,7 @@ export function OrderTableRow({ row, selected, disabled=false, onSelectRow }: Or
           sx={{
             p: 0.5,
             gap: 0.5,
-            width: 140,
+            width: 240,
             display: 'flex',
             flexDirection: 'column',
             [`& .${menuItemClasses.root}`]: {
@@ -194,6 +216,7 @@ export function OrderTableRow({ row, selected, disabled=false, onSelectRow }: Or
           }}
         >
           {row.status === 'ACTIVE' && <OrderRedirect orderId={row.id} />}
+          {row.status === 'ACTIVE' && <OrderSetup orderId={row.id} inSetup={inSetup} />}
           {row.status === 'ACTIVE' && <OrderClose orderId={row.id} />}
           {row.status === 'CLOSED' && <OrderRemove orderId={row.id} />}
         </MenuList>

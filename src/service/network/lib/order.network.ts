@@ -14,6 +14,11 @@ export type RedirectOrderProps = {
   deviceId: string
 }
 
+export type SetupOrderProps = {
+  id: string;
+  operation: 'START' | 'STOP'
+}
+
 export const findAllOrders = async (): Promise<OrderProps[]> => api.get('/orders')
 
 export const findOrderById = async (id: string) => api.get<OrderProps>(`/orders/${id}`);
@@ -23,5 +28,7 @@ export const createOrder = async (order: CreateOrderProps) => api.post('orders',
 export const redirectOrder = async ({ id, deviceId }: RedirectOrderProps) => api.post(`/orders/${id}/redirect`, { deviceId });
 
 export const closeOrder = async (id: string) => api.patch(`/orders/${id}/closed`);
+
+export const setupOrder = async ({id, operation}: SetupOrderProps) => api.post(`/orders/${id}/setup/${operation}`);
 
 export const removeOrder = async (id: string) => api.delete(`/orders/${id}`);
