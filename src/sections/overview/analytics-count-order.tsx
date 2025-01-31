@@ -41,7 +41,8 @@ export function AnalyticsCountOrders({ title, subheader, data, ...other }: Props
   // Define cores para os status
   const statusColors: Record<string, string> = {
     ON: theme.palette.success.main,
-    // OFF: theme.palette.divider,
+    SETUP: theme.palette.secondary.main,
+    OFF: theme.palette.divider,
     PAUSE: theme.palette.warning.main,
     // EMERGENCY: theme.palette.error.main,
   };

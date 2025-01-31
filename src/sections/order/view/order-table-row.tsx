@@ -146,7 +146,7 @@ export function OrderTableRow({ row, selected, disabled = false, onSelectRow }: 
 
       </StyledTableRow>
       <StyledTableCell colSpan={12}>
-        {inSetup && <Alert severity='warning'>Maquina em setup. Dipositivo IoT não está registrando contagem no momento</Alert>}
+        {inSetup && <Alert severity='warning'>Maquina em setup. Lembre de tirar a maquina de setup para conseguir contituar o processo da OP.</Alert>}
       </StyledTableCell>
 
 
@@ -164,7 +164,8 @@ export function OrderTableRow({ row, selected, disabled = false, onSelectRow }: 
                     <TableRow>
                       <StyledTableCell>Status</StyledTableCell>
                       <StyledTableCell>Contagem</StyledTableCell>
-                      <StyledTableCell>Data/Hora</StyledTableCell>
+                      <StyledTableCell>Data/Hora (Inicio)</StyledTableCell>
+                      <StyledTableCell>Data/Hora (Atual)</StyledTableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -175,6 +176,9 @@ export function OrderTableRow({ row, selected, disabled = false, onSelectRow }: 
                         </StyledTableCell>
                         <StyledTableCell component="th" scope="row">
                           {historyRow.counter}
+                        </StyledTableCell>
+                        <StyledTableCell component="th" scope="row">
+                          {format(historyRow.createdAt, 'dd/MM/yyyy HH:mm:ss:ms')}
                         </StyledTableCell>
                         <StyledTableCell component="th" scope="row">
                           {format(historyRow.updatedAt, 'dd/MM/yyyy HH:mm:ss:ms')}

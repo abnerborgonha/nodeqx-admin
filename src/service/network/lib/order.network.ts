@@ -16,7 +16,8 @@ export type RedirectOrderProps = {
 
 export type SetupOrderProps = {
   id: string;
-  operation: 'START' | 'STOP'
+  operation: 'START' | 'STOP',
+  counter?: number
 }
 
 export const findAllOrders = async (): Promise<OrderProps[]> => api.get('/orders')
@@ -29,6 +30,6 @@ export const redirectOrder = async ({ id, deviceId }: RedirectOrderProps) => api
 
 export const closeOrder = async (id: string) => api.patch(`/orders/${id}/closed`);
 
-export const setupOrder = async ({id, operation}: SetupOrderProps) => api.post(`/orders/${id}/setup/${operation}`);
+export const setupOrder = async ({id, operation, counter}: SetupOrderProps) => api.post(`/orders/${id}/setup/${operation}`, { counter });
 
 export const removeOrder = async (id: string) => api.delete(`/orders/${id}`);

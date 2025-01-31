@@ -68,6 +68,7 @@ export function OrderView() {
     const socket = io(import.meta.env.VITE_API_BASE_URL);
 
     socket.on('order-process', (orderProcess: OrderProcess) => {
+      console.log('[ORDER PROCESS]', orderProcess);
       
       if (orderProcess.status === 'CREATED') { 
         refetch();
