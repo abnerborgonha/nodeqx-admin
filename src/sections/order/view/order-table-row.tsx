@@ -18,6 +18,7 @@ import { Iconify } from 'src/components/iconify';
 
 import { DeviceItem } from 'src/sections/device/device-item';
 
+import { OrderOpen } from '../open';
 import { OrderClose } from '../close';
 import { OrderSetup } from '../setup';
 import { OrderRemove } from '../remove';
@@ -222,6 +223,7 @@ export function OrderTableRow({ row, selected, disabled = false, onSelectRow }: 
           {row.status === 'ACTIVE' && <OrderRedirect orderId={row.id} />}
           {row.status === 'ACTIVE' && <OrderSetup orderId={row.id} inSetup={inSetup} />}
           {row.status === 'ACTIVE' && <OrderClose orderId={row.id} />}
+          {row.status === 'CLOSED' && <OrderOpen orderId={row.id} />}
           {row.status === 'CLOSED' && <OrderRemove orderId={row.id} />}
         </MenuList>
       </Popover>

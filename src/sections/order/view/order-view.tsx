@@ -31,7 +31,7 @@ import type { OrderProps } from '../types/order.type';
 
 // ----------------------------------------------------------------------
 
-type OrderProcessStatus = 'CREATED' | 'PENDING' | 'CLOSED' | 'IN-SETUP' | 'OUT-SETUP';
+type OrderProcessStatus = 'CREATED' | 'PENDING' | 'CLOSED' | 'IN-SETUP' | 'OUT-SETUP' | 'OPEN';
 
 type OrderProcess = {
   id: string;
@@ -78,6 +78,11 @@ export function OrderView() {
         setPendingOrderProcess(orderProcess);
       }
       
+      if (orderProcess.status === 'OPEN') { 
+        refetch();
+        setPendingOrderProcess({} as unknown as OrderProcess);
+      }
+
       if (orderProcess.status === 'IN-SETUP') { 
         refetch();
         setPendingOrderProcess({} as unknown as OrderProcess);

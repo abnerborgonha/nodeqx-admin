@@ -32,4 +32,6 @@ export const closeOrder = async (id: string) => api.patch(`/orders/${id}/closed`
 
 export const setupOrder = async ({id, operation, counter}: SetupOrderProps) => api.post(`/orders/${id}/setup/${operation}`, { counter });
 
+export const openOrder = async (id: string) => api.post(`/orders/${id}/open`);
+
 export const removeOrder = async (id: string) => api.delete(`/orders/${id}`);
