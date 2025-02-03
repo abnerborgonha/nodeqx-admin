@@ -81,6 +81,7 @@ export function OrderTableRow({ row, selected, disabled = false, onSelectRow }: 
     'EMERGENCY': <Label color="error">EMERGENCY</Label>,
     'STOP': <Label color="info">STOP</Label>,
     'SETUP': <Label color="secondary">SETUP</Label>,
+    'BATCH': <Label color="primary">BATCH</Label>,
     'OFF': <Label color="default">OFF</Label>
   }
 
@@ -159,24 +160,30 @@ export function OrderTableRow({ row, selected, disabled = false, onSelectRow }: 
               <Typography variant="subtitle1" gutterBottom component="div">
                 Historico
               </Typography>
-              <TableContainer sx={{ maxHeight: 200 }}>
+              <TableContainer sx={{ maxHeight: 400 }}>
                 <Table size="small" aria-label="purchases">
                   <TableHead>
                     <TableRow>
                       <StyledTableCell>Status</StyledTableCell>
                       <StyledTableCell>Contagem</StyledTableCell>
+                      <StyledTableCell>Contagem Lote</StyledTableCell>
                       <StyledTableCell>Data/Hora (Inicio)</StyledTableCell>
                       <StyledTableCell>Data/Hora (Atual)</StyledTableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {row.historics?.map((historyRow) => (
-                      <TableRow key={historyRow.id}>
+                      <TableRow key={historyRow.id} style={{
+                        backgroundColor: historyRow.status === 'BATCH' ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
+                      }}>
                         <StyledTableCell component="th" scope="row">
                           {statusHistoricOrder[historyRow.status]}
                         </StyledTableCell>
                         <StyledTableCell component="th" scope="row">
                           {historyRow.counter}
+                        </StyledTableCell>
+                        <StyledTableCell component="th" scope="row">
+                          {historyRow.batchCounter}
                         </StyledTableCell>
                         <StyledTableCell component="th" scope="row">
                           {format(historyRow.createdAt, 'dd/MM/yyyy HH:mm:ss:ms')}

@@ -44,6 +44,7 @@ export function AnalyticsCountOrders({ title, subheader, data, ...other }: Props
     SETUP: theme.palette.secondary.main,
     OFF: theme.palette.divider,
     PAUSE: theme.palette.warning.main,
+    BATCH: theme.palette.primary.main,
     // EMERGENCY: theme.palette.error.main,
   };
 

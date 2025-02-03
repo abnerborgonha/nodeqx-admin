@@ -1,8 +1,9 @@
 export type OrderHistoric = {
   id: string
-  status: 'ON' | 'PAUSE' | 'EMERGENCY' | 'STOP' | 'OFF' | 'SETUP';
+  status: 'ON' | 'PAUSE' | 'EMERGENCY' | 'STOP' | 'OFF' | 'SETUP' | 'BATCH';
   counter: number
-  createdAt: Date,
+  batchCounter: number
+  createdAt: Date
   updatedAt: Date
 }
 

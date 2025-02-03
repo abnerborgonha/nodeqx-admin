@@ -17,6 +17,7 @@ import { removeDevice, type DeviceProps } from 'src/service/network/lib/device.n
 import { Label } from 'src/components/label';
 
 import { LogDrawer } from './log';
+import { DeviceEdit } from './edit';
 
 
 // ----------------------------------------------------------------------
@@ -114,7 +115,7 @@ export function DeviceItem({ device: { id, availability, deviceId, networkStatus
       <CardActions style={{ display: `${simpleView ? 'none' : 'flex'}`, justifyContent: 'space-between' }}>
         {!visableRemoveButton && <Button size="small" onClick={() => setVisebleRemoveButton(prev => !prev)}>Excluir</Button>}
         {visableRemoveButton && <Tooltip title="Ao excluir não será mias possivel utilizar esse dipositivo. (Clique duas vezes caso queria excluir)"><Button size="small" color="error" onDoubleClick={() => handleRemoveDevice(id)} >Excluir</Button></Tooltip>}
-
+        <DeviceEdit id={id} />
       </CardActions>
     </Card>
   );
